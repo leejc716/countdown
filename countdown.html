@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>타임세일 카운트다운</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            text-align: center;
+            background-color: #F4F4F4;
+            margin: 0;
+            padding: 30px 0;
+        }
+        .countdown-banner {
+            background-color: #1E3A8A;
+            color: white;
+            padding: 25px;
+            border-radius: 10px;
+            display: inline-block;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            width: 85%;
+            max-width: 450px;
+            transition: background-color 0.5s ease-in-out;
+        }
+        #highlight {
+            font-size: 34px;
+            font-weight: bold;
+            color: #FFC107;
+            margin-bottom: 12px;
+        }
+        @keyframes blink {
+            0% { color: white; }
+            50% { color: yellow; }
+            100% { color: white; }
+        }
+        .blink-effect {
+            animation: blink 1s infinite;
+        }
+        #warning {
+            font-size: 22px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 15px;
+        }
+        #countdown {
+            font-size: 38px;
+            font-weight: bold;
+            margin-top: 8px;
+            padding: 10px 0;
+        }
+        .countdown-dn {
+            color: #FFC107;
+            font-size: 40px;
+            transition: color 0.5s ease-in-out;
+        }
+        .countdown-value {
+            color: white;
+            font-size: 38px;
+        }
+        .countdown-milli {
+            display: inline-block;
+            font-size: 30px;
+            color: white;
+        }
+        .reserve-button {
+            background-color: #2DB400;
+            color: white;
+            border: none;
+            padding: 14px 30px;
+            font-size: 22px;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-top: 18px;
+            box-shadow: 0 3px 7px rgba(0, 0, 0, 0.15);
+            transition: background-color 0.3s, transform 0.2s;
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
+            max-width: 400px;
+        }
+        .reserve-button:hover {
+            background-color: #249600;
+            transform: scale(1.05);
+        }
+        #remaining-seats {
+            font-size: 20px;
+            color: #FFC107;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="countdown-banner" id="banner">
+        <p id="highlight">⚡ 곧 판매 종료! ⚡</p>
+        <p id="warning">⏳ 선착순 마감 임박!</p>
+        <div id="countdown">
+            <span class="countdown-dn">D-3일</span>
+            <span class="countdown-value">00시 00분 00초</span>
+            <span class="countdown-milli">99</span>
+        </div>  
+        <p id="remaining-seats">🚀 남은 자리: <span id="seats">15</span>석</p>
+        <a href="https://m.site.naver.com/1hiTz" class="reserve-button" id="reserve-btn">
+            🚀 남은 자리 15석! 지금 예약
+        </a>
+    </div>
+
+    <script>
+        let remainingSeats = 15;
+        const endDate = new Date("2025-02-20 20:14:59").getTime();
+        let milliseconds = 99;
+        let decreaseProbability = 0.0025;
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const timeLeft = endDate - now;
+
+            if (timeLeft <= 0) {
+                document.getElementById("countdown").innerHTML = "⏳ 판매 종료!";
+                document.getElementById("remaining-seats").style.display = "none";
+                document.getElementById("reserve-btn").innerHTML = `🔥 마지막 기회! 예약 서두르세요!`; // ✅ 마감 후에도 버튼 글귀 유지
+                return;
+            }
+
+            const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+            if (days === 0) { 
+                document.getElementById("banner").style.backgroundColor = "#B22222"; 
+                document.getElementById("highlight").classList.add("blink-effect");
+                document.querySelector(".countdown-dn").style.color = "yellow"; 
+                document.getElementById("reserve-btn").innerHTML = `🔥 마지막 기회! 예약 서두르세요!`;
+            }
+
+            document.getElementById("countdown").innerHTML = 
+                `<span class="countdown-dn">D-${days}일 </span> 
+                 <span class="countdown-value">${hours}시 ${minutes}분 ${seconds}초</span>
+                 <span class="countdown-milli">${milliseconds}</span>`;
+        }
+
+        function autoDecreaseSeatCount() {
+            let probability = Math.random();
+            if (probability < decreaseProbability && remainingSeats > 1) {  
+                remainingSeats--;
+                document.getElementById("seats").innerText = remainingSeats;
+                document.getElementById("reserve-btn").innerText = `🚀 남은 자리 ${remainingSeats}석! 지금 예약`;
+            }
+        }
+
+        function updateMilliseconds() {
+            milliseconds--;
+            if (milliseconds < 0) milliseconds = 99;
+            document.querySelector(".countdown-milli").innerText = milliseconds < 10 ? "0" + milliseconds : milliseconds;
+        }
+
+        function decreaseSeatOnClick() {
+            if (remainingSeats > 1) {
+                remainingSeats--;
+                document.getElementById("seats").innerText = remainingSeats;
+                if (new Date().getTime() < endDate) { // ✅ 마감 후에도 버튼 글귀 유지
+                    document.getElementById("reserve-btn").innerText = `🚀 남은 자리 ${remainingSeats}석! 지금 예약`;
+                }
+                updateCountdown();
+            }
+        }
+
+        document.getElementById("reserve-btn").addEventListener("click", decreaseSeatOnClick);
+
+        setInterval(updateCountdown, 1000);
+        setInterval(autoDecreaseSeatCount, 10000);
+        setInterval(updateMilliseconds, 10);
+
+        updateCountdown();
+    </script>
+
+</body>
+</html>
